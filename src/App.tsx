@@ -1,5 +1,5 @@
 import React, { useState, useEffect, createContext, useContext } from 'react';
-import { Plus, BarChart3, Database, Zap, Moon, Sun } from 'lucide-react';
+import { Plus, BarChart3, Moon, Sun } from 'lucide-react';
 import { Dataset, datasetsApi, CreateDatasetRequest } from './services/api';
 import ChartDisplay from './components/ChartDisplay';
 import DatasetForm from './components/DatasetForm';
@@ -88,12 +88,12 @@ function App() {
 
   const handleUpdateDataset = async (datasetData: CreateDatasetRequest) => {
     if (!editingDataset) return;
-    
+
     try {
       setError(null);
       setIsLoading(true);
-      const updatedDataset = await datasetsApi.update(editingDataset.id, datasetData);
-      setDatasets(prev => prev.map(d => d.id === editingDataset.id ? updatedDataset : d));
+      const updatedDataset = await datasetsApi.update(editingDataset._id, datasetData);
+      setDatasets(prev => prev.map(d => d._id === editingDataset._id ? updatedDataset : d));
       setSelectedDataset(updatedDataset);
       setEditingDataset(null);
       setCurrentView('chart');
@@ -108,15 +108,15 @@ function App() {
   };
 
   const handleDeleteDataset = async (id: string) => {
-    const dataset = datasets.find(d => d.id === id);
+    const dataset = datasets.find(d => d._id === id);
     if (window.confirm(`Are you sure you want to delete "${dataset?.name}"? This action cannot be undone.`)) {
       try {
         setError(null);
         setIsLoading(true);
         await datasetsApi.delete(id);
-        setDatasets(prev => prev.filter(d => d.id !== id));
+        setDatasets(prev => prev.filter(d => d._id !== id));
         showSuccessMessage('Dataset deleted successfully!');
-        if (selectedDataset?.id === id) {
+        if (selectedDataset?._id === id) {
           setSelectedDataset(null);
           setCurrentView('list');
         }
@@ -163,7 +163,7 @@ function App() {
             onCancel={() => setCurrentView('list')}
           />
         );
-      
+
       case 'edit':
         return editingDataset ? (
           <DatasetForm
@@ -173,7 +173,7 @@ function App() {
             isEditing={true}
           />
         ) : null;
-      
+
       case 'chart':
         return selectedDataset ? (
           <div className="space-y-6">
@@ -189,7 +189,7 @@ function App() {
             <ChartDisplay dataset={selectedDataset} />
           </div>
         ) : null;
-      
+
       default:
         return (
           <div className="space-y-6">
@@ -208,7 +208,7 @@ function App() {
               onSelect={handleSelectDataset}
               onEdit={handleEditDataset}
               onDelete={handleDeleteDataset}
-              selectedDataset={selectedDataset}
+              selectedDataset={selectedDataset ?? undefined}
             />
           </div>
         );
@@ -218,98 +218,69 @@ function App() {
   return (
     <DarkModeContext.Provider value={{ isDarkMode, toggleDarkMode }}>
       <div className="min-h-screen transition-colors duration-300 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <div className="container px-4 py-8 mx-auto">
-        {/* Header */}
-        <header className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700">
-                <BarChart3 className="w-8 h-8 text-white" />
+        <div className="container px-4 py-8 mx-auto">
+          {/* Header */}
+          <header className="mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-lg shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700">
+                  <BarChart3 className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Chart Plotter</h1>
+                  <p className="text-gray-600 dark:text-gray-400">Create and visualize your data with interactive charts</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Chart Plotter</h1>
-                <p className="text-gray-600 dark:text-gray-400">Create and visualize your data with interactive charts</p>
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={toggleDarkMode}
+                  className="p-2 transition-all duration-200 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 hover:shadow-lg dark:border-gray-700"
+                  title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  {isDarkMode ? (
+                    <Sun className="w-5 h-5 text-yellow-500" />
+                  ) : (
+                    <Moon className="w-5 h-5 text-gray-600" />
+                  )}
+                </button>
+                <ServerStatus />
               </div>
             </div>
-            <div className="flex items-center gap-4">
+          </header>
+
+          {/* Messages */}
+          {successMessage && (
+            <div className="flex items-center justify-between p-4 mb-6 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
+              <p className="text-green-800 dark:text-green-400">{successMessage}</p>
               <button
-                onClick={toggleDarkMode}
-                className="p-2 transition-all duration-200 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 hover:shadow-lg dark:border-gray-700"
-                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                onClick={() => setSuccessMessage(null)}
+                className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
               >
-                {isDarkMode ? (
-                  <Sun className="w-5 h-5 text-yellow-500" />
-                ) : (
-                  <Moon className="w-5 h-5 text-gray-600" />
-                )}
+                ×
               </button>
-              <ServerStatus />
             </div>
-          </div>
-          
-          {/* Feature highlights */}
-          <div className="grid grid-cols-1 gap-4 mb-6 md:grid-cols-3">
-            <div className="flex items-center gap-3 p-4 transition-shadow bg-white border border-gray-100 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:shadow-md">
-              <Database className="w-8 h-8 text-blue-500" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Data Management</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Full CRUD operations for datasets</p>
-              </div>
+          )}
+          {error && (
+            <div className="flex items-center justify-between p-4 mb-6 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+              <p className="text-red-800 dark:text-red-400">{error}</p>
+              <button
+                onClick={clearError}
+                className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+              >
+                ×
+              </button>
             </div>
-            <div className="flex items-center gap-3 p-4 transition-shadow bg-white border border-gray-100 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:shadow-md">
-              <BarChart3 className="w-8 h-8 text-green-500" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Multiple Chart Types</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Line, Bar, and Scatter plots</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 p-4 transition-shadow bg-white border border-gray-100 rounded-lg shadow-sm dark:bg-gray-800 dark:border-gray-700 hover:shadow-md">
-              <Zap className="w-8 h-8 text-purple-500" />
-              <div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100">Real-time Updates</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Instant chart rendering</p>
-              </div>
-            </div>
-          </div>
-        </header>
+          )}
 
-        {/* Success message */}
-        {successMessage && (
-          <div className="flex items-center justify-between p-4 mb-6 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800">
-            <p className="text-green-800 dark:text-green-400">{successMessage}</p>
-            <button
-              onClick={() => setSuccessMessage(null)}
-              className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
-            >
-              ×
-            </button>
-          </div>
-        )}
+          {/* Main Content */}
+          <main>{renderContent()}</main>
 
-        {/* Error message */}
-        {error && (
-          <div className="flex items-center justify-between p-4 mb-6 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
-            <p className="text-red-800 dark:text-red-400">{error}</p>
-            <button
-              onClick={clearError}
-              className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-            >
-              ×
-            </button>
-          </div>
-        )}
-
-        {/* Main content */}
-        <main>
-          {renderContent()}
-        </main>
-
-        {/* Footer */}
-        <footer className="mt-16 text-center text-gray-500 dark:text-gray-400">
-          <p>Built with React, TypeScript, Chart.js, and Express.js</p>
-        </footer>
+          {/* Footer */}
+          <footer className="mt-16 text-center text-gray-500 dark:text-gray-400">
+            <p>Built with React, TypeScript, Chart.js, and Express.js</p>
+          </footer>
+        </div>
       </div>
-    </div>
     </DarkModeContext.Provider>
   );
 }
