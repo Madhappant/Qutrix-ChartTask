@@ -9,14 +9,8 @@ const PORT = 3001;
 // Connect to MongoDB
 connectDB();
 
-// ✅ CORS FIX
-app.use(cors({
-  origin: ['http://localhost:3000', 'https://qutrix-frontend.vercel.app'], // ✅ Replace with your actual frontend domain
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true,
-}));
-
 // Middleware
+app.use(cors());
 app.use(express.json());
 
 // Routes
@@ -44,6 +38,7 @@ app.post('/api/datasets', async (req, res) => {
   try {
     const { name, description, xData, yData, chartType } = req.body;
 
+    // Validation
     if (!name || !xData || !yData || !Array.isArray(xData) || !Array.isArray(yData)) {
       return res.status(400).json({
         success: false,
@@ -119,6 +114,7 @@ app.put('/api/datasets/:id', async (req, res) => {
   try {
     const { name, description, xData, yData, chartType } = req.body;
 
+    // Validation
     if (xData && yData && xData.length !== yData.length) {
       return res.status(400).json({
         success: false,
