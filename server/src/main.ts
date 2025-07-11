@@ -7,8 +7,7 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    // origin: ['http://localhost:5173', 'http://localhost:3001'],
-    origin: 'https://qutrix-charttask.vercel.app',
+    origin: ['https://qutrix-chart-task.vercel.app/', 'https://qutrix-charttask.onrender.com'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -20,6 +19,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   
   await app.listen(3001);
-  console.log('Server is running on http://localhost:3001');
+  console.log('Server is running on https://qutrix-charttask.onrender.com');
 }
 bootstrap();
