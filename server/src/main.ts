@@ -7,7 +7,12 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
+<<<<<<< HEAD
    origin: ['http://localhost:5173', 'http://localhost:3001'],
+=======
+    // origin: ['http://localhost:5173', 'http://localhost:3001'],
+    origin: 'https://qutrix-charttask.vercel.app',
+>>>>>>> 50861ef (Final)
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
