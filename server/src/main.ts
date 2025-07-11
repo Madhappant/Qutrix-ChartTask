@@ -7,7 +7,7 @@ async function bootstrap() {
   
   // Enable CORS
   app.enableCors({
-    origin: ['http://localhost:5173', 'https://qutrix-charttask.onrender.com/'],
+    origin: ['http://localhost:5173', 'http://localhost:3001/'],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
@@ -19,6 +19,6 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   
   await app.listen(3001);
-  console.log('Server is running on https://qutrix-charttask.onrender.com');
+  console.log('Server is running on http://localhost:3001');
 }
 bootstrap();
